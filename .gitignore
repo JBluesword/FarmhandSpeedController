@@ -1,0 +1,8 @@
+/build/
+/release/
+/.vs/
+/obj/
+/bin/
+*.user
+*.cfg
+*.log
