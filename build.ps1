@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $source = Join-Path $projectRoot 'src\FarmhandSpeedController.cs'
 $output = Join-Path $projectRoot 'build\FarmhandSpeedController.dll'
-$releaseZip = Join-Path $projectRoot 'release\FarmhandSpeedController-0.1.0-TEST.zip'
+$releaseZip = Join-Path $projectRoot 'release\FarmhandSpeedController-1.0.0.zip'
 $gameRoot = 'C:\Program Files (x86)\Steam\steamapps\common\Farm Together 2'
 $bepInExCore = Join-Path $gameRoot 'BepInEx\core'
 $interop = Join-Path $gameRoot 'BepInEx\interop'
@@ -48,4 +48,4 @@ Compress-Archive -LiteralPath @(
     (Join-Path $projectRoot 'CHANGELOG.md')
 ) -DestinationPath $releaseZip -CompressionLevel Optimal
 Write-Host "Built: $output"
-Write-Host "Test package: $releaseZip"
+Write-Host "Release package: $releaseZip"

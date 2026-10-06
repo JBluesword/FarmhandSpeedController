@@ -13,8 +13,8 @@ using View.Farmhands;
 [assembly: AssemblyCompany("JBluesword")]
 [assembly: AssemblyProduct("FarmhandSpeedController")]
 [assembly: AssemblyTitle("FarmhandSpeedController")]
-[assembly: AssemblyVersion("0.1.0.0")]
-[assembly: AssemblyFileVersion("0.1.0.0")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
 
 namespace FarmhandSpeedController
 {
@@ -23,7 +23,7 @@ namespace FarmhandSpeedController
     {
         private const string PluginGuid = "farmhandspeedcontroller";
         private const string PluginName = "FarmhandSpeedController";
-        private const string PluginVersion = "0.1.0";
+        private const string PluginVersion = "1.0.0";
         private const float MinimumApproachDistance = 0.7f;
 
         private static ManualLogSource _log;
@@ -53,7 +53,7 @@ namespace FarmhandSpeedController
         {
             _log = Log;
             BindConfiguration();
-            _log.LogInfo($"{PluginName} {PluginVersion} by JBluesword loading. Farmhand-only test build; no player/tractor speed or reward changes.");
+            _log.LogInfo($"{PluginName} {PluginVersion} by JBluesword loading. Farmhand-only speed control; no player/tractor speed or reward changes.");
             LogConfiguration();
 
             try
@@ -61,12 +61,15 @@ namespace FarmhandSpeedController
                 _harmony = new Harmony(PluginGuid);
                 Patch("movement", typeof(LocalFarmhandView), "UpdateGoingToTile",
                     new[] { typeof(float) }, nameof(UpdateGoingToTilePostfix));
-                Patch("travel", typeof(LocalFarmhandView), "StartGoingToTile",
-                    new[] { typeof(FarmTileId) }, nameof(StartGoingToTilePostfix));
                 Patch("work", typeof(FarmhandView), "StartWorking",
                     new[] { typeof(FarmTileId) }, nameof(StartWorkingPostfix));
-                Patch("work observation", typeof(FarmhandView), "PerformWork",
-                    new[] { typeof(FarmTileId) }, nameof(PerformWorkPostfix));
+                if (_debugLogging.Value || _logEveryTask.Value)
+                {
+                    Patch("travel diagnostics", typeof(LocalFarmhandView), "StartGoingToTile",
+                        new[] { typeof(FarmTileId) }, nameof(StartGoingToTilePostfix));
+                    Patch("work diagnostics", typeof(FarmhandView), "PerformWork",
+                        new[] { typeof(FarmTileId) }, nameof(PerformWorkPostfix));
+                }
                 _log.LogInfo($"Patch status: movement={_movementPatchActive}, work={_workPatchActive}. If either is false, send BepInEx/LogOutput.log.");
             }
             catch (Exception exception)
@@ -94,10 +97,10 @@ namespace FarmhandSpeedController
             _approachSlowdownDistance = Config.Bind("Speed", "ApproachSlowdownDistance", 2.5f,
                 new ConfigDescription("Distance from a destination at which the movement boost begins tapering back to vanilla, reducing overshoot.",
                     new AcceptableValueRange<float>(1.0f, 5.0f)));
-            _debugLogging = Config.Bind("Diagnostics", "EnableDebugLogging", true,
-                "Log periodic patch counters and movement samples for this test build.");
-            _logEveryTask = Config.Bind("Diagnostics", "LogEveryTask", true,
-                "Log each farmhand destination, work start, and work invocation. Disable after testing to reduce console volume.");
+            _debugLogging = Config.Bind("Diagnostics", "EnableDebugLogging", false,
+                "Log periodic farmhand speed and work counters. Enable when reporting a problem.");
+            _logEveryTask = Config.Bind("Diagnostics", "LogEveryTask", false,
+                "Log each farmhand destination, work start, and work invocation. Enable only when troubleshooting.");
             _summaryIntervalSeconds = Config.Bind("Diagnostics", "SummaryIntervalSeconds", 30,
                 new ConfigDescription("Seconds between diagnostic summaries while farmhands are active.",
                     new AcceptableValueRange<int>(10, 300)));
@@ -134,7 +137,7 @@ namespace FarmhandSpeedController
         private static void StartGoingToTilePostfix(LocalFarmhandView __instance, FarmTileId __0)
         {
             if (!_enabled.Value || __instance == null) return;
-            _travelStarted++;
+            if (_debugLogging.Value) _travelStarted++;
             if (!_logEveryTask.Value) return;
             try
             {
@@ -179,13 +182,16 @@ namespace FarmhandSpeedController
                 if (appliedMultiplier > 1.001f)
                 {
                     __instance.targetVelocity = vanillaTarget * appliedMultiplier;
-                    _movementScaled++;
+                    if (_debugLogging.Value) _movementScaled++;
                 }
 
-                _movementUpdates++;
-                _sumBaseMovement += baseMagnitude;
-                _sumTargetMovement += targetMagnitude;
-                MaybeLogSummary(__instance, distance, baseMagnitude, targetMagnitude, appliedMultiplier);
+                if (_debugLogging.Value)
+                {
+                    _movementUpdates++;
+                    _sumBaseMovement += baseMagnitude;
+                    _sumTargetMovement += targetMagnitude;
+                    MaybeLogSummary(__instance, distance, baseMagnitude, targetMagnitude, appliedMultiplier);
+                }
             }
             catch (Exception exception)
             {
@@ -220,7 +226,7 @@ namespace FarmhandSpeedController
                         __instance.workAnimationDuration = Mathf.Max(0.05f, originalAnimation / multiplier);
                 }
 
-                _workStarted++;
+                if (_debugLogging.Value) _workStarted++;
                 if (_logEveryTask.Value)
                     _log.LogInfo($"WORK START worker={WorkerId(__instance)} tile={__0} workType={__instance.WorkType} workTimer={originalWork:0.000}->{__instance.workDuration:0.000}s animationTimer={originalAnimation:0.000}->{__instance.workAnimationDuration:0.000}s multiplier={multiplier:0.00} performedWork={__instance.performedWork}");
             }
@@ -236,7 +242,7 @@ namespace FarmhandSpeedController
             try
             {
                 if (__instance.IsRemote) return;
-                _workInvoked++;
+                if (_debugLogging.Value) _workInvoked++;
                 if (_logEveryTask.Value)
                     _log.LogInfo($"WORK INVOKED worker={WorkerId(__instance)} tile={__0} workType={__instance.WorkType} state={__instance.State}; vanilla TryPerformFarmhandWork/network path returned (success must be verified in game)");
             }
