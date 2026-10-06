@@ -2,7 +2,7 @@
 
 FarmhandSpeedController is a Farm Together 2 BepInEx IL2CPP mod by JBluesword. It independently accelerates farmhand travel between tiles and the time farmhands spend working. This is a **0.1.0 test build**, not a verified public release.
 
-![Farmhand Speed Controller banner](https://raw.githubusercontent.com/JBluesword/FarmhandSpeedController/main/assets/farmhand-speed-banner.png)
+![Farmhand Speed Controller cover](https://raw.githubusercontent.com/JBluesword/FarmhandSpeedController/main/assets/farmhand-speed-cover-v2.png)
 
 ## Features
 
