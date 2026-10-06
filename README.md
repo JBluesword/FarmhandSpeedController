@@ -2,7 +2,7 @@
 
 FarmhandSpeedController is a Farm Together 2 BepInEx IL2CPP mod by JBluesword. It independently accelerates farmhand travel between tiles and the time farmhands spend working. This is a **0.1.0 test build**, not a verified public release.
 
-![Farmhand Speed Controller banner](assets/farmhand-speed-banner.png)
+![Farmhand Speed Controller banner](https://raw.githubusercontent.com/JBluesword/FarmhandSpeedController/main/assets/farmhand-speed-banner.png)
 
 ## Features
 
@@ -39,7 +39,7 @@ The movement setting changes a **target velocity**, not the entire work cycle. P
 
 ## Testing And Troubleshooting
 
-Follow [TESTING.md](TESTING.md) and send `BepInEx\LogOutput.log` plus the tested settings when reporting a problem. Search the log for `FarmhandSpeedController`, `TRAVEL START`, `WORK START`, `WORK INVOKED`, `DIAG`, and `patch error`. A `WORK INVOKED` entry means the vanilla method was called; it does not prove that the game accepted or completed the tile action.
+Follow the [test plan](https://github.com/JBluesword/FarmhandSpeedController/blob/main/TESTING.md) and send `BepInEx\LogOutput.log` plus the tested settings when reporting a problem. Search the log for `FarmhandSpeedController`, `TRAVEL START`, `WORK START`, `WORK INVOKED`, `DIAG`, and `patch error`. A `WORK INVOKED` entry means the vanilla method was called; it does not prove that the game accepted or completed the tile action.
 
 This test build has not yet been play-tested. In particular, movement overshoot, work animation alignment, and online host/client behavior require real gameplay verification. Do not use it on another player's farm until those checks pass.
 
@@ -53,4 +53,4 @@ Thanks to the Farm Together 2 community for the request and testing, and to the 
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See the [license](https://github.com/JBluesword/FarmhandSpeedController/blob/main/LICENSE).
